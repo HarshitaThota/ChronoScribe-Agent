@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ChronoScribe Agent</title>
+  <!-- Cute, readable vibes -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ====== Whimsical Theme ====== */
+    :root{
+      --bg1:#0b1022; --bg2:#131a38;
+      --card:#151b34; --ink:#f6f7fb; --muted:#bfc7d9;
+      --glow:#9b8cff; --accent:#6be7ff; --accent2:#ffd166;
+      --ok:#71f4af; --warn:#ffcc66; --bad:#ff7b92;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--ink);
+      font-family:"Nunito", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 800px at 10% -10%, rgba(155,140,255,.18), transparent 60%),
+        radial-gradient(900px 700px at 90% -20%, rgba(107,231,255,.14), transparent 60%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
+      overflow-x:hidden;
+    }
+
+    /* Soft moving sparkles */
+    .sparkle-layer, .sparkle-layer::after{
+      position:fixed; inset:0; pointer-events:none; z-index:-1;
+      background-image:
+        radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,.55) 70%, transparent 72%),
+        radial-gradient(2px 2px at 80% 30%, rgba(255,255,255,.45) 70%, transparent 72%),
+        radial-gradient(1.5px 1.5px at 30% 70%, rgba(255,255,255,.35) 70%, transparent 72%),
+        radial-gradient(1.5px 1.5px at 60% 80%, rgba(255,255,255,.4) 70%, transparent 72%),
+        radial-gradient(2px 2px at 50% 50%, rgba(255,255,255,.5) 70%, transparent 72%);
+      animation: drift 18s linear infinite;
+      opacity:.8;
+    }
+    .sparkle-layer::after{
+      content:""; filter:blur(1px); opacity:.45; animation-duration:26s;
+    }
+    @keyframes drift { from{background-position:0 0} to{background-position:600px 400px} }
+
+    .wrap{max-width:1040px;margin:36px auto;padding:0 18px}
+    .hero{
+      display:flex; align-items:center; gap:14px; margin-bottom:18px;
+    }
+    .logo{
+      width:48px; height:48px; border-radius:14px;
+      background: radial-gradient(80% 80% at 30% 20%, var(--accent) 0%, #6bb8ff 30%, #6e6bff 60%, #4b3fff 100%);
+      box-shadow: 0 8px 36px rgba(107,231,255,.35), inset 0 0 18px rgba(255,255,255,.25);
+      position:relative;
+    }
+    .logo::after{ /* twinkling star */
+      content:"✨"; position:absolute; right:-8px; top:-10px; font-size:18px; animation: twinkle 2.2s ease-in-out infinite;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,.8));
+    }
+    @keyframes twinkle { 0%,100%{transform:rotate(0) scale(1)} 50%{transform:rotate(12deg) scale(1.15)} }
+
+    h1{margin:0; font-weight:800; letter-spacing:.3px}
+    .badge{
+      font-size:12px; padding:6px 10px; border-radius:999px; color:var(--muted);
+      border:1px dashed rgba(255,255,255,.22); background:rgba(255,255,255,.04)
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:20px; padding:16px;
+      box-shadow: 0 14px 50px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+    }
+
+    .grid{display:grid; gap:14px}
+    @media(min-width:860px){ .grid{grid-template-columns:1.6fr .9fr} }
+
+    label{display:block; font-size:12px; color:var(--muted); margin:8px 0 8px}
+   textarea,input,select{
+  width:100%;
+  border-radius:14px;
+  padding:12px 14px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(10,14,30,.6);
+  color:var(--ink);
+  outline:none;
+}
+button, .btn, .pill { width:auto; }
+.pills { display:flex; flex-wrap:wrap; gap:8px; }
+.pill  { padding:6px 10px; font-size:13px; }
+.actions { display:flex; flex-wrap:wrap; gap:10px; }
+.btn { padding:10px 14px; font-size:14px; }
+
+    textarea{min-height:120px; resize:vertical}
+    textarea:focus, select:focus{box-shadow: 0 0 0 3px rgba(155,140,255,.25), 0 0 0 1px var(--glow) inset}
+
+    .pills{display:flex; flex-wrap:wrap; gap:8px}
+    .pill{
+      border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:var(--ink);
+      padding:8px 12px; border-radius:999px; cursor:pointer; font-weight:700; font-size:13px;
+      transition: transform .06s ease, filter .2s ease;
+    }
+    .pill[data-active="true"]{
+      background: radial-gradient(120% 200% at 20% 0%, rgba(155,140,255,.35), rgba(255,255,255,.06));
+      border-color: rgba(155,140,255,.65);
+      box-shadow: 0 6px 24px rgba(155,140,255,.25);
+    }
+    .pill:active{ transform: translateY(1px) }
+
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .row > *{flex:1 1 160px}
+
+    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    .btn{
+      cursor:pointer; border-radius:14px; padding:12px 16px; font-weight:800; letter-spacing:.2px;
+      border:1px solid rgba(255,255,255,.18); color:var(--ink); background: linear-gradient(180deg,#1b2350,#131a38);
+      box-shadow: 0 8px 28px rgba(50,70,200,.35);
+    }
+    .btn:hover{filter:brightness(1.08)}
+    .btn:disabled{opacity:.6; cursor:not-allowed}
+
+    .btn-magic{
+      background: linear-gradient(180deg,#2a3ba6,#1b2350);
+      border-color: rgba(155,140,255,.7);
+      box-shadow: 0 10px 42px rgba(155,140,255,.35), inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .btn-ghost{
+      background: rgba(255,255,255,.05);
+    }
+
+    .status{color:var(--muted); min-height:22px; display:flex; align-items:center; gap:6px}
+    .wand{display:inline-block; animation: waggle 1.4s ease-in-out infinite}
+    @keyframes waggle { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(10deg)} }
+
+    .result{margin-top:20px}
+    .sc{border:1px solid rgba(255,255,255,.16); border-radius:16px; padding:12px; margin-top:12px;
+        background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));}
+    .sc h4{margin:0 0 6px}
+    .tag{display:inline-block; font-size:12px; border:1px solid rgba(255,255,255,.18);
+         border-radius:999px; padding:4px 10px; margin:4px 6px 0 0; color:var(--muted); background:rgba(255,255,255,.04)}
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+    .muted{color:var(--muted)}
+    pre{white-space:pre-wrap; background:rgba(10,14,30,.6); border:1px solid rgba(255,255,255,.14);
+        border-radius:14px; padding:12px; overflow:auto}
+
+    /* Confetti bits */
+    .confetti{
+      position:fixed; width:8px; height:12px; top:-10px; left:0; opacity:.9;
+      transform: rotate(0deg);
+      will-change: transform, top, left, opacity;
+      border-radius:2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sparkle-layer"></div>
+  <div class="wrap">
+    <div class="hero">
+      <div class="logo"></div>
+      <div>
+        <h1>ChronoScribe Agent</h1>
+        <div class="badge">✨ whimsical what-if simulator</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <label for="what">What if…</label>
+        <textarea id="what" placeholder="e.g., What if the printing press was never invented?">What if commercial fusion becomes cost-competitive in 2030?</textarea>
+
+        <div style="margin-top:10px">
+          <div class="muted" style="margin-bottom:6px">Vibe</div>
+          <div class="pills" id="pills">
+            <button class="pill" data-val="default" data-active="true">Default</button>
+            <button class="pill" data-val="cinematic">Cinematic 🎬</button>
+            <button class="pill" data-val="academic">Academic 📚</button>
+            <button class="pill" data-val="risk">Risk ⚠️</button>
+            <button class="pill" data-val="optimistic">Optimistic 🌤️</button>
+            <button class="pill" data-val="pessimistic">Pessimistic 🌧️</button>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label for="horizon">Horizon</label>
+            <select id="horizon">
+              <option value="short">Short (5y)</option>
+              <option value="medium">Medium (25y)</option>
+              <option value="long" selected>Long (50y)</option>
+            </select>
+          </div>
+          <div>
+            <label for="focus">Focus</label>
+            <select id="focus">
+              <option value="mixed" selected>Mixed</option>
+              <option value="tech">Tech</option>
+              <option value="history">History</option>
+              <option value="economics">Economics</option>
+              <option value="culture">Culture</option>
+              <option value="geopolitics">Geopolitics</option>
+              <option value="science">Science</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="runBtn" class="btn btn-magic">🪄 Cast Simulation</button>
+          <button id="copyBtn" class="btn btn-ghost" title="Copy last JSON">📋 Copy JSON</button>
+          <button id="surpriseBtn" class="btn btn-ghost" title="Try a fun prompt">🎲 Surprise me</button>
+        </div>
+
+        <div id="status" class="status" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card">
+        <div class="muted" style="margin-bottom:8px">Tip jar of time</div>
+        <ul class="muted" style="margin:0 0 10px 18px">
+          <li>Type a counterfactual and hit <b>Cast Simulation</b>.</li>
+          <li>Swap the <b>Vibe</b> for instant tone changes.</li>
+          <li>Result shows <i>Baseline / Best / Worst</i> branches with probabilities.</li>
+        </ul>
+        <div class="muted" style="font-size:12px; opacity:.85">API: <code>POST /simulate</code></div>
+      </div>
+    </div>
+
+    <div class="result">
+      <div class="card">
+        <h3 style="margin:0 0 6px">Result</h3>
+        <div id="pretty"></div>
+        <details style="margin-top:12px">
+          <summary>Raw JSON</summary>
+          <pre id="raw">(run a simulation to see JSON)</pre>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let lastJson = null;
+    let preset = 'default';
+
+    // Pills behaviour
+    const pills = document.querySelectorAll('.pill');
+    pills.forEach(p => p.addEventListener('click', () => {
+      pills.forEach(x => x.dataset.active = 'false');
+      p.dataset.active = 'true';
+      preset = p.dataset.val;
+    }));
+
+    const SURPRISE = [
+      "What if the internet launched in 1965?",
+      "What if commercial quantum computers were cheap by 2032?",
+      "What if antibiotics were never discovered?",
+      "What if we could only store 10GB per person?",
+      "What if Rome never fell?",
+      "What if everyone worked 20 hours per week?"
+    ];
+
+    function pct(p){ if(typeof p!=='number') return ''; return Math.round(p*100) + '%' }
+    function scenarioClass(name){ const n=String(name||'').toLowerCase(); if(n.includes('best')) return 'ok'; if(n.includes('worst')) return 'bad'; return 'warn'; }
+
+    function renderPretty(data){
+      const out = [];
+      out.push(`<div class="muted">Premise</div><div style="font-size:20px;margin:2px 0 8px; font-weight:800">${data.premise||''}</div>`);
+      if (Array.isArray(data.assumptions) && data.assumptions.length){
+        out.push(`<div class="muted">Assumptions</div><div>`);
+        data.assumptions.forEach(a=> out.push(`<span class="tag">${a}</span>`));
+        out.push(`</div>`);
+      }
+      if (Array.isArray(data.scenarios)){
+        out.push(`<div style="margin-top:12px" class="muted">Scenarios</div>`);
+        data.scenarios.forEach(s=>{
+          out.push(`<div class="sc">`);
+          out.push(`<h4 class="${scenarioClass(s.name)}">${s.name||'Scenario'} · ${pct(s.probability)}</h4>`);
+          if (s.summary) out.push(`<div class="muted" style="margin-bottom:6px">${s.summary}</div>`);
+          if (Array.isArray(s.timeline) && s.timeline.length){
+            out.push(`<div style="margin-top:6px"><b>Timeline</b><ul style="margin:6px 0 0 18px">`);
+            s.timeline.forEach(t=>{
+              out.push(`<li><b>${t.year_or_period||''}</b> — ${t.event||''} <span class="muted">(${t.rationale||''})</span></li>`);
+            });
+            out.push(`</ul></div>`);
+          }
+          if (Array.isArray(s.second_order_effects) && s.second_order_effects.length){
+            out.push(`<div style="margin-top:6px"><b>Second-order effects</b><div>`);
+            s.second_order_effects.forEach(e=> out.push(`<span class="tag">${e}</span>`));
+            out.push(`</div></div>`);
+          }
+          out.push(`</div>`);
+        });
+      }
+      if (Array.isArray(data.tradeoffs) && data.tradeoffs.length){
+        out.push(`<div style="margin-top:12px" class="muted">Tradeoffs</div><div>`);
+        data.tradeoffs.forEach(t=> out.push(`<span class="tag">${t}</span>`));
+        out.push(`</div>`);
+      }
+      if (Array.isArray(data.red_team) && data.red_team.length){
+        out.push(`<div style="margin-top:12px" class="muted">Red Team</div><div>`);
+        data.red_team.forEach(r=> out.push(`<span class="tag">${r}</span>`));
+        out.push(`</div>`);
+      }
+      if (data.disclaimer){
+        out.push(`<div style="margin-top:12px" class="muted">${data.disclaimer}</div>`);
+      }
+      $('pretty').innerHTML = out.join('');
+    }
+
+    function setStatus(text, spin=false){
+      $('status').innerHTML = spin ? `<span class="wand">🪄</span> ${text}` : text;
+    }
+
+    function celebrate(){
+      // lightweight confetti
+      const colors=[ "#ffd166", "#9b8cff", "#6be7ff", "#71f4af", "#ff7b92" ];
+      const pieces = 80;
+      for(let i=0;i<pieces;i++){
+        const d = document.createElement('div');
+        d.className='confetti';
+        d.style.background = colors[i%colors.length];
+        d.style.left = (Math.random()*100)+'vw';
+        d.style.transform = `rotate(${Math.random()*360}deg)`;
+        const duration = 1200 + Math.random()*1200;
+        d.animate([
+          { transform:`translateY(-10px) rotate(${Math.random()*90}deg)`, top:'-10px', opacity:1 },
+          { transform:`translate(${(Math.random()*2-1)*80}px, 100vh) rotate(${Math.random()*720}deg)`, top:'100vh', opacity:.9 }
+        ], { duration, easing:'cubic-bezier(.2,.6,.2,1)' });
+        document.body.appendChild(d);
+        setTimeout(()=> d.remove(), duration+50);
+      }
+    }
+
+    async function simulate(){
+      const body = {
+        what_if: $('what').value.trim(),
+        preset,
+        horizon: $('horizon').value,
+        focus: $('focus').value
+      };
+      if(!body.what_if){ setStatus('Give me a what-if ✨'); return; }
+
+      setStatus('Summoning timelines…', true);
+      $('runBtn').disabled = true;
+
+      try{
+        const res = await fetch('/simulate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'accept': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if(!res.ok){ throw new Error((data && data.detail) ? data.detail : `HTTP ${res.status}`); }
+        lastJson = data;
+        $('raw').textContent = JSON.stringify(data, null, 2);
+        renderPretty(data);
+        setStatus('✨ Done. New timeline charted.');
+        celebrate();
+      }catch(err){
+        setStatus('Uh-oh: ' + err.message);
+        $('raw').textContent = (lastJson ? JSON.stringify(lastJson, null, 2) : '(no previous JSON)') + `\n\nError: ${err.message}`;
+        $('pretty').innerHTML = '';
+      }finally{
+        $('runBtn').disabled = false;
+      }
+    }
+
+    $('runBtn').addEventListener('click', simulate);
+    $('copyBtn').addEventListener('click', async ()=>{
+      if(!lastJson){ setStatus('Nothing to copy yet.'); return; }
+      await navigator.clipboard.writeText(JSON.stringify(lastJson, null, 2));
+      setStatus('Copied JSON to clipboard.');
+      setTimeout(()=> setStatus(''), 1200);
+    });
+    $('surpriseBtn').addEventListener('click', ()=>{
+      $('what').value = SURPRISE[Math.floor(Math.random()*SURPRISE.length)];
+      setStatus('Surprise loaded. Now cast it! ✨');
+    });
+  </script>
+</body>
+</html>
