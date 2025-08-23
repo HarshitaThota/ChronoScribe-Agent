@@ -30,18 +30,18 @@ It produces **structured JSON** with **Baseline / Best / Worst** branches, timel
 
 ## 📁 Project Structure
 
-chronoscribe-agent/
-├─ app/
-│ ├─ main.py # FastAPI routes (/, /health, /simulate)
-│ ├─ agent.py # ChronoScribeAgent class + tools + loop
-│ ├─ schemas.py # Pydantic request models
-│ └─ static/
-│ └─ index.html # whimsical one-file UI
-├─ Dockerfile
-├─ docker-compose.yml
-├─ requirements.txt
-├─ .env.example
-└─ README.md
+    chronoscribe-agent/
+    ├─ app/
+    │ ├─ main.py # FastAPI routes (/, /health, /simulate)
+    │ ├─ agent.py # ChronoScribeAgent class + tools + loop
+    │ ├─ schemas.py # Pydantic request models
+    │ └─ static/
+    │ └─ index.html # whimsical one-file UI
+    ├─ Dockerfile
+    ├─ docker-compose.yml
+    ├─ requirements.txt
+    ├─ .env.example
+    └─ README.md
 ---
 
 ## 🚀 Quick Start
