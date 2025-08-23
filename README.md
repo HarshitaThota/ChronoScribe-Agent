@@ -6,7 +6,7 @@ It produces **structured JSON** with **Baseline / Best / Worst** branches, timel
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-🚀-009688)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
-![DB](https://img.shields.io/badge/Database-None-success)
+
 
 ---
 
