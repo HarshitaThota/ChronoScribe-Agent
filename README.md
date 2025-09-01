@@ -69,13 +69,9 @@ docker compose up --build
 **⚙️ Configuration**
 
     - Set in .env:
-
     - OPENAI_API_KEY (required)
-
     - OPENAI_MODEL (default: gpt-4o-mini)
-
     - TOOLS_ENABLED (default: 1 — set to 0 to disable tool use)
-
     - CURRENT_YEAR (optional; pin for deterministic demos)
 
 
