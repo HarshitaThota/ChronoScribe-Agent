@@ -5,8 +5,8 @@ It produces **structured JSON** with **Baseline / Best / Worst** branches, timel
 
 
 
-![Prompt](Question.jpg)
-![Answer](Answer.jpg)
+![Prompt](Question.png)
+![Answer](Answer.png)
 
 
 
